@@ -32,11 +32,11 @@ token_T* lexer_get_next_token(lexer_T* lexer){
         if (lexer->c == ' ' || lexer->c == 10)
             lexer_skip_whitespace(lexer);
         
-        if (isalnum(lexer->c))
+        if (isalnum((unsigned char) lexer->c) || lexer->c == '_')
             return lexer_collect_id(lexer);
         
-        if (lexer->c == '$')
-        return lexer_collect_string(lexer);
+        if (lexer->c == '"')
+            return lexer_collect_string(lexer);
 
         switch (lexer->c) {
             case 'equals': return lexer_advance_with_token(lexer, init_token(TOKEN_EQUALS, lexer_get_current_char_as_string(lexer))); break;
@@ -61,7 +61,7 @@ token_T* lexer_collect_string(lexer_T* lexer){
     char* value = calloc(1, sizeof(char));
     value[0] = '\0';
 
-    while(lexer->c != '"') {
+    while (lexer->c != '"' && lexer->c != '\0') {
         char* s = lexer_get_current_char_as_string(lexer);
         value = realloc(value, (strlen(value) + strlen(s) + 1) * sizeof(char));
         strcat(value, s);
@@ -78,7 +78,7 @@ token_T* lexer_collect_id(lexer_T* lexer){
     char* value = calloc(1, sizeof(char));
     value[0] = '\0';
 
-    while (isalnum(lexer->c)) {
+    while (isalnum((unsigned char) lexer->c) || lexer->c == '_') {
         //printf("lexer->c: %c\n", lexer->c);
         char* s = lexer_get_current_char_as_string(lexer);
         value = realloc(value, (strlen(value) + strlen(s) + 1) * sizeof(char));
@@ -87,7 +87,6 @@ token_T* lexer_collect_id(lexer_T* lexer){
         lexer_advance(lexer);
     }
 
-    lexer_advance(lexer);
     return init_token(TOKEN_ID, value);
 }
 
