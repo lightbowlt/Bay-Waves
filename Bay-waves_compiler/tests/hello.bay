@@ -1,0 +1,6 @@
+variable name equals "hello, world".
+variable age equals 1 + 1 - 2.
+
+say the name end.
+say "welcome".
+say "i'm \age years old".

@@ -1,0 +1,5 @@
+variable name equals "hello, world".
+variable age equals 15.
+
+say the name end.
+say the age end.

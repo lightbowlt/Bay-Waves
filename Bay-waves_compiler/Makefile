@@ -1,22 +1,19 @@
-exec = bayc.out
-sources = $(wildcard src/*.c)
-objects = $(sources:.c=.o)
-#flags = -g
+CC = gcc
+CFLAGS = -std=c11 -Wall -Wextra -g
+EXEC = bay
+SOURCES = $(shell find src -type f -name '*.c' | sort)
+OBJECTS = $(patsubst src/%.c,src/%.o,$(SOURCES))
 
+all: $(EXEC)
 
-%.o: %.c include/%.h
-	gcc -c -g $< -o $@
+$(EXEC): $(OBJECTS)
+	$(CC) $(CFLAGS) $(OBJECTS) -o $(EXEC)
 
-$(exec): $(objects)
-	gcc $(objects) -g -o $(exec)
+src/%.o: src/%.c
+	$(CC) $(CFLAGS) -c $< -o $@
 
-
-
-install:
-	make
-	cp ./bay.out /usr/local/bin/bay
+install: $(EXEC)
+	cp ./$(EXEC) /usr/local/bin/bay
 
 clean:
-	-rm *.out
-	-rm *.o
-	-rm src/*.o
+	rm -f $(EXEC) $(OBJECTS) *.out

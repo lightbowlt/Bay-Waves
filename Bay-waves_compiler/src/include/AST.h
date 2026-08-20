@@ -1,36 +1,57 @@
-#ifndef AST_H
-#define AST_H
-#include <ctype.h>
-#include <stdlib.h>
+#ifndef BAY_AST_H
+#define BAY_AST_H
 
-typedef struct AST_STRUCT {
-    enum {
-        AST_VARIABLE_DEFENITION,
-        AST_VARIABLE,
-        AST_FUNCTION_CALL,
-        AST_STRING,
-        AST_COMPOND,
-    } type;
+#include <stddef.h>
 
-    /* AST VARIABLE DEFINITION */
-    char* variable_defenition_variable_name;
-    struct AST_STRUCT* variable_defenition_variable_value;
+typedef struct AST_STRUCT AST_T;
 
-    /* AST VARIABLE */
-    char* variable_name;
+enum {
+    AST_PROGRAM,
+    AST_VARIABLE_DECLARATION,
+    AST_INTEGER_LITERAL,
+    AST_STRING_LITERAL,
+    AST_BINARY_EXPRESSION,
+    AST_VARIABLE_REFERENCE,
+    AST_SAY_STATEMENT
+};
 
-    /* AST FUNCTION CALL */
-    char* function_call_name;
-    struct AST_STRUCT** function_call_arguments;
-    size_t function_call_arguments_size;
+struct AST_STRUCT {
+    int type;
 
-    /* AST STRING */
+    /* program */
+    AST_T** statements;
+    size_t statement_count;
+
+    /* variable declaration */
+    char* declaration_name;
+    AST_T* declaration_value;
+
+    /* integer literal */
+    long integer_value;
+
+    /* string literal */
     char* string_value;
 
-    /* AST COMPOUND */
-    struct AST_StRUCT** compound_value;
-    size_t compound_size;
-} AST_T;
+    /* binary expression */
+    char binary_operator;
+    AST_T* left;
+    AST_T* right;
 
-AST_T* init_ast(int type);
+    /* variable reference */
+    char* variable_name;
+
+    /* say statement */
+    AST_T* say_expression;
+};
+
+AST_T* ast_new_program(void);
+void ast_append_statement(AST_T* program, AST_T* statement);
+AST_T* ast_new_variable_declaration(const char* name, AST_T* value);
+AST_T* ast_new_integer_literal(long value);
+AST_T* ast_new_string_literal(const char* value);
+AST_T* ast_new_binary_expression(char op, AST_T* left, AST_T* right);
+AST_T* ast_new_variable_reference(const char* name);
+AST_T* ast_new_say_statement(AST_T* expression);
+void ast_free(AST_T* node);
+
 #endif
