@@ -39,7 +39,7 @@ token_T* lexer_get_next_token(lexer_T* lexer){
             return lexer_collect_string(lexer);
 
         switch (lexer->c) {
-            case 'equals': return lexer_advance_with_token(lexer, init_token(TOKEN_EQUALS, lexer_get_current_char_as_string(lexer))); break;
+            case '=': return lexer_advance_with_token(lexer, init_token(TOKEN_EQUALS, lexer_get_current_char_as_string(lexer))); break;
             case '.': return lexer_advance_with_token(lexer, init_token(TOKEN_POINT, lexer_get_current_char_as_string(lexer))); break;
             case '(': return lexer_advance_with_token(lexer, init_token(TOKEN_LPAREN, lexer_get_current_char_as_string(lexer))); break;
             case ')': return lexer_advance_with_token(lexer, init_token(TOKEN_RPAREN, lexer_get_current_char_as_string(lexer))); break;
