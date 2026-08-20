@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
 static char* read_entire_file(const char* path) {
     FILE* file = fopen(path, "rb");
@@ -65,21 +66,14 @@ static void strip_extension(char* dest, size_t dest_size, const char* source_pat
     snprintf(dest, dest_size, "%s", source_path);
 }
 
-static int write_target_file(const Target* target, const char* source_path, unsigned char* machine_code, size_t machine_size) {
-    char output_path[512];
-    char base_path[512];
-    strip_extension(base_path, sizeof(base_path), source_path);
-
+static int write_target_file(const Target* target, const char* output_path, unsigned char* machine_code, size_t machine_size) {
     if (strcmp(target->object_format, "pe") == 0) {
-        snprintf(output_path, sizeof(output_path), "%s.exe", base_path);
         return pe_write_executable(output_path, machine_code, machine_size, target->name);
     }
     if (strcmp(target->object_format, "elf") == 0) {
-        snprintf(output_path, sizeof(output_path), "%s", base_path);
         return elf_write_executable(output_path, machine_code, machine_size, target->name);
     }
     if (strcmp(target->object_format, "macho") == 0) {
-        snprintf(output_path, sizeof(output_path), "%s", base_path);
         return macho_write_executable(output_path, machine_code, machine_size, target->name);
     }
 
@@ -90,11 +84,13 @@ static int write_target_file(const Target* target, const char* source_path, unsi
 void compiler_print_help(void) {
     printf("Bay compile usage:\n");
     printf("  bay compile <file.bay>\n");
-    printf("  bay compile <file.bay> --target <target>\n\n");
+    printf("  bay compile <file.bay> --target <target>\n");
+    printf("  bay compile <file.bay> -o <output>\n");
+    printf("  bay compile <file.bay> --output <output>\n\n");
     target_print_supported();
 }
 
-int compiler_compile_file(const char* path, const char* target_name) {
+int compiler_compile_file(const char* path, const char* target_name, const char* output_path) {
     if (path == NULL) {
         fprintf(stderr, "error: missing input file\n");
         return 1;
@@ -145,11 +141,22 @@ int compiler_compile_file(const char* path, const char* target_name) {
         codegen_ok = 1;
     }
 
+    char resolved_output[512];
+    if (output_path != NULL && output_path[0] != '\0') {
+        snprintf(resolved_output, sizeof(resolved_output), "%s", output_path);
+    } else {
+        char base_path[512];
+        strip_extension(base_path, sizeof(base_path), path);
+        snprintf(resolved_output, sizeof(resolved_output), "%s", base_path);
+    }
+
     int result = 0;
     if (codegen_ok == 0) {
-        result = write_target_file(&target, path, machine_code, machine_size);
+        result = write_target_file(&target, resolved_output, machine_code, machine_size);
         if (result == 0) {
-            printf("compiled %s -> %s\n", path, target.name);
+            printf("compiled %s -> %s\n", path, resolved_output);
+        } else {
+            unlink(resolved_output);
         }
     }
 

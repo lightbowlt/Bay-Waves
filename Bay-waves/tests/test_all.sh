@@ -22,6 +22,30 @@ run_case() {
 
 run_case "variables milestone" "tests/variables.bay" $'hello, world\n15'
 
+cat > /tmp/bay_compiled_vars.bay <<'EOF'
+variable name equals "hello, world".
+variable age equals 15.
+
+say the name end.
+say the age end.
+EOF
+./bay compile /tmp/bay_compiled_vars.bay >/tmp/bay_compile_vars.out 2>/tmp/bay_compile_vars.err || true
+if [[ ! -x /tmp/bay_compiled_vars ]]; then
+  echo "FAIL: compiled variable executable missing"
+  exit 1
+fi
+if ! file /tmp/bay_compiled_vars 2>/dev/null | grep -q "ELF 64-bit"; then
+  echo "FAIL: compiled variable executable is not ELF64"
+  exit 1
+fi
+actual=$(/tmp/bay_compiled_vars)
+if [[ "$actual" != $'hello, world\n15' ]]; then
+  echo "FAIL: compiled variable executable output"
+  echo "Expected: $'hello, world\n15'"
+  echo "Actual: $actual"
+  exit 1
+fi
+
 cat > /tmp/bay_var_x.bay <<'EOF'
 variable x equals 10.
 say the x end.

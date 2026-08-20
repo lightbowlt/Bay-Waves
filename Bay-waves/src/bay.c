@@ -66,12 +66,12 @@ static int run_file(const char* path) {
     return 0;
 }
 
-static int compile_file(const char* path, const char* target_name) {
+static int compile_file(const char* path, const char* target_name, const char* output_path) {
     if (path == NULL) {
         fprintf(stderr, "error: missing input file\n");
         return 1;
     }
-    return compiler_compile_file(path, target_name);
+    return compiler_compile_file(path, target_name, output_path);
 }
 
 int main(int argc, char** argv) {
@@ -103,18 +103,42 @@ int main(int argc, char** argv) {
             compiler_print_help();
             return 0;
         }
-        if (argc == 2 || argc > 5) {
+        if (argc < 3) {
             compiler_print_help();
             return 1;
         }
-        if (argc == 3) {
-            return compile_file(argv[2], NULL);
+
+        const char* source_path = NULL;
+        const char* target_name = NULL;
+        const char* output_path = NULL;
+
+        for (int i = 2; i < argc; ++i) {
+            if (strcmp(argv[i], "--target") == 0) {
+                if (i + 1 >= argc) {
+                    compiler_print_help();
+                    return 1;
+                }
+                target_name = argv[++i];
+            } else if (strcmp(argv[i], "-o") == 0 || strcmp(argv[i], "--output") == 0) {
+                if (i + 1 >= argc) {
+                    compiler_print_help();
+                    return 1;
+                }
+                output_path = argv[++i];
+            } else if (source_path == NULL) {
+                source_path = argv[i];
+            } else {
+                compiler_print_help();
+                return 1;
+            }
         }
-        if (argc == 5 && strcmp(argv[3], "--target") == 0) {
-            return compile_file(argv[2], argv[4]);
+
+        if (source_path == NULL) {
+            compiler_print_help();
+            return 1;
         }
-        compiler_print_help();
-        return 1;
+
+        return compile_file(source_path, target_name, output_path);
     }
 
     fprintf(stderr, "error: unknown command '%s'\n", argv[1]);
