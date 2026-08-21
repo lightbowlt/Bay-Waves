@@ -1,0 +1,4 @@
+variable ready equals true.
+variable finished equals false.
+say the ready end.
+say the finished end.

@@ -1,0 +1,6 @@
+function add with a and b
+    return a + b.
+end.
+
+variable result equals add with 5 and 10.
+say the result end.

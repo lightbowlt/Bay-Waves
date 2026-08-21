@@ -1,0 +1,5 @@
+variable age equals 15.
+while age is less than 18
+    say "not yet".
+    variable age equals age + 1.
+end.

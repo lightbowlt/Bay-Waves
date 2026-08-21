@@ -1,0 +1,4 @@
+include files_include.bay only Function1
+
+say "The secret word is:\n"
+Function1.secretword

@@ -1,0 +1,6 @@
+variable age equals 21.
+if age is greater than or equal to 18 then
+    say "adult".
+otherwise
+    say "minor".
+end.

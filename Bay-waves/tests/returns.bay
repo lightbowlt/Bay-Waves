@@ -1,0 +1,6 @@
+function square with number
+    return number * number.
+end.
+
+variable result equals square with 5.
+say the result end.

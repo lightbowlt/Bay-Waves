@@ -24,6 +24,7 @@ Environment* environment_new(void) {
     env->capacity = 8;
     env->names = calloc(env->capacity, sizeof(char*));
     env->values = calloc(env->capacity, sizeof(Value));
+    env->parent = NULL;
     if (env->names == NULL || env->values == NULL) {
         free(env->names);
         free(env->values);
@@ -33,15 +34,22 @@ Environment* environment_new(void) {
     return env;
 }
 
+Environment* environment_child(Environment* parent) {
+    Environment* child = environment_new();
+    if (child == NULL) {
+        return NULL;
+    }
+    child->parent = parent;
+    return child;
+}
+
 void environment_free(Environment* env) {
     if (env == NULL) {
         return;
     }
     for (size_t i = 0; i < env->count; ++i) {
         free(env->names[i]);
-        if (env->values[i].type == VALUE_TYPE_STRING) {
-            free(env->values[i].as.string_value);
-        }
+        value_free(env->values[i]);
     }
     free(env->names);
     free(env->values);
@@ -71,9 +79,7 @@ void environment_set(Environment* env, const char* name, Value value) {
 
     for (size_t i = 0; i < env->count; ++i) {
         if (strcmp(env->names[i], name) == 0) {
-            if (env->values[i].type == VALUE_TYPE_STRING && env->values[i].as.string_value != NULL) {
-                free(env->values[i].as.string_value);
-            }
+            value_free(env->values[i]);
             env->values[i] = value;
             return;
         }
@@ -96,6 +102,10 @@ Value environment_get(Environment* env, const char* name) {
         }
     }
 
+    if (env->parent != NULL) {
+        return environment_get(env->parent, name);
+    }
+
     return value_string("");
 }
 
@@ -108,6 +118,9 @@ int environment_has(Environment* env, const char* name) {
             return 1;
         }
     }
+    if (env->parent != NULL) {
+        return environment_has(env->parent, name);
+    }
     return 0;
 }
 
@@ -118,10 +131,24 @@ Value value_integer(long value) {
     return v;
 }
 
+Value value_boolean(int value) {
+    Value v;
+    v.type = VALUE_TYPE_BOOLEAN;
+    v.as.boolean_value = value;
+    return v;
+}
+
 Value value_string(const char* value) {
     Value v;
     v.type = VALUE_TYPE_STRING;
     v.as.string_value = dup_string(value == NULL ? "" : value);
+    return v;
+}
+
+Value value_function(Function* function) {
+    Value v;
+    v.type = VALUE_TYPE_FUNCTION;
+    v.as.function_value = function;
     return v;
 }
 
@@ -133,6 +160,12 @@ char* value_to_string(Value value) {
     }
     if (value.type == VALUE_TYPE_STRING) {
         return dup_string(value.as.string_value == NULL ? "" : value.as.string_value);
+    }
+    if (value.type == VALUE_TYPE_BOOLEAN) {
+        return dup_string(value.as.boolean_value ? "true" : "false");
+    }
+    if (value.type == VALUE_TYPE_FUNCTION) {
+        return dup_string("<function>");
     }
     return dup_string("");
 }

@@ -1,0 +1,9 @@
+variable name equals "global".
+
+function test
+    variable name equals "local".
+    say the name end.
+end.
+
+test.
+say the name end.

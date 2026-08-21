@@ -1,0 +1,6 @@
+include packages math
+
+call Function1
+    variable secret equals math.random
+    secretword equals say the secretword end
+end call

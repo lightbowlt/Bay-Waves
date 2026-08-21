@@ -1,0 +1,4 @@
+variable age equals 25.
+if age is less than 10 or age is greater than 20 then
+    say "outside range".
+end.

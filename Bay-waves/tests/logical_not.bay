@@ -1,0 +1,4 @@
+variable finished equals false.
+if not finished then
+    say "still working".
+end.

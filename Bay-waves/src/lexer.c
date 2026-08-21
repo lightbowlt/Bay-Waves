@@ -123,6 +123,27 @@ token_T* lexer_collect_identifier(lexer_T* lexer) {
     else if (strcmp(value, "say") == 0) type = TOKEN_SAY;
     else if (strcmp(value, "the") == 0) type = TOKEN_THE;
     else if (strcmp(value, "end") == 0) type = TOKEN_END;
+    else if (strcmp(value, "true") == 0) type = TOKEN_TRUE;
+    else if (strcmp(value, "false") == 0) type = TOKEN_FALSE;
+    else if (strcmp(value, "if") == 0) type = TOKEN_IF;
+    else if (strcmp(value, "then") == 0) type = TOKEN_THEN;
+    else if (strcmp(value, "otherwise") == 0) type = TOKEN_OTHERWISE;
+    else if (strcmp(value, "repeat") == 0) type = TOKEN_REPEAT;
+    else if (strcmp(value, "times") == 0) type = TOKEN_TIMES;
+    else if (strcmp(value, "while") == 0) type = TOKEN_WHILE;
+    else if (strcmp(value, "function") == 0) type = TOKEN_FUNCTION;
+    else if (strcmp(value, "with") == 0) type = TOKEN_WITH;
+    else if (strcmp(value, "return") == 0) type = TOKEN_RETURN;
+    else if (strcmp(value, "ask") == 0) type = TOKEN_ASK;
+    else if (strcmp(value, "and") == 0) type = TOKEN_AND;
+    else if (strcmp(value, "or") == 0) type = TOKEN_OR;
+    else if (strcmp(value, "not") == 0) type = TOKEN_NOT;
+    else if (strcmp(value, "is") == 0) type = TOKEN_IS;
+    else if (strcmp(value, "equal") == 0) type = TOKEN_EQUAL;
+    else if (strcmp(value, "to") == 0) type = TOKEN_TO;
+    else if (strcmp(value, "greater") == 0) type = TOKEN_GREATER;
+    else if (strcmp(value, "less") == 0) type = TOKEN_LESS;
+    else if (strcmp(value, "than") == 0) type = TOKEN_THAN;
 
     token_T* token = init_token(type, value, start_line, start_col);
     free(value);
@@ -148,7 +169,11 @@ token_T* lexer_collect_string(lexer_T* lexer) {
             if (next == '\0') {
                 lexer_error(lexer, "unterminated string literal");
             }
-            if (next == 'n') {
+            if (isalpha((unsigned char)next) || next == '_') {
+                append_char(&value, &length, &capacity, '\\');
+                lexer_advance(lexer);
+                continue;
+            } else if (next == 'n') {
                 append_char(&value, &length, &capacity, '\n');
                 lexer_advance(lexer);
                 lexer_advance(lexer);
@@ -166,10 +191,6 @@ token_T* lexer_collect_string(lexer_T* lexer) {
             } else if (next == '"') {
                 append_char(&value, &length, &capacity, '"');
                 lexer_advance(lexer);
-                lexer_advance(lexer);
-                continue;
-            } else if (isalpha((unsigned char)next) || next == '_') {
-                append_char(&value, &length, &capacity, '\\');
                 lexer_advance(lexer);
                 continue;
             } else {
